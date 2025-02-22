@@ -1,54 +1,41 @@
-import { type Event, type InsertEvent, type ContactMessage, type InsertContact } from "@shared/schema";
+import { type Event, type InsertEvent, type ContactMessage, type InsertContact, events, contactMessages } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Events
   getEvents(): Promise<Event[]>;
   getEvent(id: number): Promise<Event | undefined>;
   createEvent(event: InsertEvent): Promise<Event>;
-  
+
   // Contact Messages
   createContactMessage(message: InsertContact): Promise<ContactMessage>;
   getContactMessages(): Promise<ContactMessage[]>;
 }
 
-export class MemStorage implements IStorage {
-  private events: Map<number, Event>;
-  private contactMessages: Map<number, ContactMessage>;
-  private eventId: number;
-  private messageId: number;
-
-  constructor() {
-    this.events = new Map();
-    this.contactMessages = new Map();
-    this.eventId = 1;
-    this.messageId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getEvents(): Promise<Event[]> {
-    return Array.from(this.events.values());
+    return await db.select().from(events);
   }
 
   async getEvent(id: number): Promise<Event | undefined> {
-    return this.events.get(id);
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event;
   }
 
   async createEvent(event: InsertEvent): Promise<Event> {
-    const id = this.eventId++;
-    const newEvent = { ...event, id };
-    this.events.set(id, newEvent);
+    const [newEvent] = await db.insert(events).values(event).returning();
     return newEvent;
   }
 
   async createContactMessage(message: InsertContact): Promise<ContactMessage> {
-    const id = this.messageId++;
-    const newMessage = { ...message, id, createdAt: new Date() };
-    this.contactMessages.set(id, newMessage);
+    const [newMessage] = await db.insert(contactMessages).values(message).returning();
     return newMessage;
   }
 
   async getContactMessages(): Promise<ContactMessage[]> {
-    return Array.from(this.contactMessages.values());
+    return await db.select().from(contactMessages);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
