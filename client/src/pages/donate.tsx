@@ -18,7 +18,30 @@ import { Heart } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
+  throw new Error('Missing Stripe publishable key');
+}
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+const CARD_ELEMENT_OPTIONS = {
+  style: {
+    base: {
+      color: "#32325d",
+      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+      fontSmoothing: "antialiased",
+      fontSize: "16px",
+      "::placeholder": {
+        color: "#aab7c4"
+      },
+      padding: "10px 12px",
+    },
+    invalid: {
+      color: "#fa755a",
+      iconColor: "#fa755a"
+    }
+  }
+};
 
 const PRESET_AMOUNTS = [10, 25, 50, 100, 250, 500];
 
@@ -42,6 +65,11 @@ function DonationForm() {
 
   const handleDonation = async (data: InsertDonation) => {
     if (!stripe || !elements) {
+      toast({
+        title: "Error",
+        description: "Stripe has not been properly initialized",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -188,23 +216,8 @@ function DonationForm() {
 
             <div className="mb-6">
               <FormLabel>Card Details</FormLabel>
-              <div className="mt-1 p-3 border rounded-md">
-                <CardElement
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: '16px',
-                        color: '#424770',
-                        '::placeholder': {
-                          color: '#aab7c4',
-                        },
-                      },
-                      invalid: {
-                        color: '#9e2146',
-                      },
-                    },
-                  }}
-                />
+              <div className="mt-1 p-3 border rounded-md bg-white shadow-sm">
+                <CardElement options={CARD_ELEMENT_OPTIONS} />
               </div>
             </div>
 
@@ -240,7 +253,16 @@ export default function Donate() {
             theme: 'stripe',
             variables: {
               colorPrimary: '#0066cc',
+              fontFamily: 'system-ui, sans-serif',
+              spacingUnit: '4px',
+              borderRadius: '4px',
             },
+            rules: {
+              '.Input': {
+                border: '1px solid #E2E8F0',
+                padding: '8px 12px',
+              }
+            }
           },
         }}
       >
