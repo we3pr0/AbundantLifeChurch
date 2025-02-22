@@ -22,6 +22,15 @@ export default function Events() {
             </div>
           ))}
         </div>
+      ) : events?.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-xl text-gray-600 mb-2">
+            No upcoming events at the moment.
+          </p>
+          <p className="text-gray-500">
+            Stay tuned for updates on our upcoming events and gatherings!
+          </p>
+        </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events?.map((event) => (
