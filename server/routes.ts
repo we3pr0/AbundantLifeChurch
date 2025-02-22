@@ -1,0 +1,43 @@
+import type { Express } from "express";
+import { createServer } from "http";
+import { storage } from "./storage";
+import { insertEventSchema, insertContactSchema } from "@shared/schema";
+
+export async function registerRoutes(app: Express) {
+  app.get("/api/events", async (_req, res) => {
+    const events = await storage.getEvents();
+    res.json(events);
+  });
+
+  app.get("/api/events/:id", async (req, res) => {
+    const event = await storage.getEvent(Number(req.params.id));
+    if (!event) {
+      res.status(404).json({ message: "Event not found" });
+      return;
+    }
+    res.json(event);
+  });
+
+  app.post("/api/events", async (req, res) => {
+    const result = insertEventSchema.safeParse(req.body);
+    if (!result.success) {
+      res.status(400).json({ message: "Invalid event data" });
+      return;
+    }
+    const event = await storage.createEvent(result.data);
+    res.status(201).json(event);
+  });
+
+  app.post("/api/contact", async (req, res) => {
+    const result = insertContactSchema.safeParse(req.body);
+    if (!result.success) {
+      res.status(400).json({ message: "Invalid contact data" });
+      return;
+    }
+    const message = await storage.createContactMessage(result.data);
+    res.status(201).json(message);
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
