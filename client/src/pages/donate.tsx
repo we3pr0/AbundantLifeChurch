@@ -18,13 +18,12 @@ import { Heart } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const STRIPE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-if (!STRIPE_KEY) {
-  console.error('Missing Stripe publishable key');
-  throw new Error('Missing Stripe publishable key. Please check your environment variables.');
-}
+// Access the environment variable directly
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
-const stripePromise = loadStripe(STRIPE_KEY);
+if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
+  console.warn('Stripe publishable key is missing. Card processing will not work.');
+}
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
