@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, boolean, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -19,10 +19,24 @@ export const contactMessages = pgTable("contact_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const donations = pgTable("donations", {
+  id: serial("id").primaryKey(),
+  amount: integer("amount").notNull(),
+  email: text("email").notNull(),
+  name: text("name").notNull(),
+  message: text("message"),
+  paymentIntentId: text("payment_intent_id").notNull(),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertEventSchema = createInsertSchema(events).omit({ id: true });
 export const insertContactSchema = createInsertSchema(contactMessages).omit({ id: true, createdAt: true });
+export const insertDonationSchema = createInsertSchema(donations).omit({ id: true, createdAt: true, paymentIntentId: true, status: true });
 
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type Event = typeof events.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;
 export type ContactMessage = typeof contactMessages.$inferSelect;
+export type InsertDonation = z.infer<typeof insertDonationSchema>;
+export type Donation = typeof donations.$inferSelect;

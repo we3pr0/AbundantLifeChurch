@@ -11,6 +11,7 @@ export default function Navigation() {
     { href: "/", label: "Home" },
     { href: "/events", label: "Events" },
     { href: "/live", label: "Live Stream" },
+    { href: "/donate", label: "Donate" },
     { href: "/contact", label: "Contact" },
   ];
 

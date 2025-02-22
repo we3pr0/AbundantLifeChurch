@@ -1,4 +1,4 @@
-import { type Event, type InsertEvent, type ContactMessage, type InsertContact, events, contactMessages } from "@shared/schema";
+import { type Event, type InsertEvent, type ContactMessage, type InsertContact, type Donation, type InsertDonation, events, contactMessages, donations } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -11,6 +11,11 @@ export interface IStorage {
   // Contact Messages
   createContactMessage(message: InsertContact): Promise<ContactMessage>;
   getContactMessages(): Promise<ContactMessage[]>;
+
+  // Donations
+  createDonation(donation: InsertDonation & { paymentIntentId: string }): Promise<Donation>;
+  updateDonationStatus(id: number, status: string): Promise<Donation>;
+  getDonation(id: number): Promise<Donation | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -35,6 +40,25 @@ export class DatabaseStorage implements IStorage {
 
   async getContactMessages(): Promise<ContactMessage[]> {
     return await db.select().from(contactMessages);
+  }
+
+  async createDonation(donation: InsertDonation & { paymentIntentId: string }): Promise<Donation> {
+    const [newDonation] = await db.insert(donations).values(donation).returning();
+    return newDonation;
+  }
+
+  async updateDonationStatus(id: number, status: string): Promise<Donation> {
+    const [updatedDonation] = await db
+      .update(donations)
+      .set({ status })
+      .where(eq(donations.id, id))
+      .returning();
+    return updatedDonation;
+  }
+
+  async getDonation(id: number): Promise<Donation | undefined> {
+    const [donation] = await db.select().from(donations).where(eq(donations.id, id));
+    return donation;
   }
 }
 

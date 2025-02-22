@@ -6,6 +6,7 @@ import Navigation from "@/components/Navigation";
 import Home from "@/pages/home";
 import Events from "@/pages/events";
 import Live from "@/pages/live";
+import Donate from "@/pages/donate";
 import Contact from "@/pages/contact";
 import NotFound from "@/pages/not-found";
 
@@ -15,6 +16,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/events" component={Events} />
       <Route path="/live" component={Live} />
+      <Route path="/donate" component={Donate} />
       <Route path="/contact" component={Contact} />
       <Route component={NotFound} />
     </Switch>
