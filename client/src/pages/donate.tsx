@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Heart } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -63,16 +63,18 @@ function DonationForm() {
       const { clientSecret } = await response.json();
 
       // Confirm the payment
-      const { error } = await stripe.confirmPayment({
-        elements,
-        clientSecret,
-        confirmParams: {
-          return_url: `${window.location.origin}/donate/success`,
+      const { error: paymentError } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement)!,
+          billing_details: {
+            name: data.name,
+            email: data.email,
+          },
         },
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (paymentError) {
+        throw new Error(paymentError.message);
       }
 
       toast({
@@ -186,7 +188,24 @@ function DonationForm() {
 
             <div className="mb-6">
               <FormLabel>Card Details</FormLabel>
-              <PaymentElement />
+              <div className="mt-1 p-3 border rounded-md">
+                <CardElement
+                  options={{
+                    style: {
+                      base: {
+                        fontSize: '16px',
+                        color: '#424770',
+                        '::placeholder': {
+                          color: '#aab7c4',
+                        },
+                      },
+                      invalid: {
+                        color: '#9e2146',
+                      },
+                    },
+                  }}
+                />
+              </div>
             </div>
 
             <Button
@@ -214,7 +233,17 @@ export default function Donate() {
         </p>
       </div>
 
-      <Elements stripe={stripePromise}>
+      <Elements 
+        stripe={stripePromise}
+        options={{
+          appearance: {
+            theme: 'stripe',
+            variables: {
+              colorPrimary: '#0066cc',
+            },
+          },
+        }}
+      >
         <DonationForm />
       </Elements>
     </div>
