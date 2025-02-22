@@ -10,6 +10,7 @@ export default function Navigation() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/events", label: "Events" },
+    { href: "/live", label: "Live Stream" },
     { href: "/contact", label: "Contact" },
   ];
 
