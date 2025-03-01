@@ -14,46 +14,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Heart } from "lucide-react";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-
-// Access the environment variable directly
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
-
-if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
-  console.warn('Stripe publishable key is missing. Card processing will not work.');
-}
-
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      color: "#32325d",
-      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-      fontSmoothing: "antialiased",
-      fontSize: "16px",
-      "::placeholder": {
-        color: "#aab7c4"
-      },
-      padding: "10px 12px",
-    },
-    invalid: {
-      color: "#fa755a",
-      iconColor: "#fa755a"
-    }
-  }
-};
+import { Heart, Banknotes } from "lucide-react"; // Import Banknotes icon
 
 const PRESET_AMOUNTS = [10, 25, 50, 100, 250, 500];
 
 function DonationForm() {
   const { toast } = useToast();
-  const [isProcessing, setIsProcessing] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState<number>(25);
   const [customAmount, setCustomAmount] = useState<string>("");
-  const stripe = useStripe();
-  const elements = useElements();
-  const [paymentMethod, setPaymentMethod] = useState("card"); // 'card' or 'bank'
+  const [donationMethod, setDonationMethod] = useState<"bank" | "card">("card"); // Add donation method state
 
   const form = useForm<InsertDonation>({
     resolver: zodResolver(insertDonationSchema),
@@ -68,20 +37,30 @@ function DonationForm() {
   const handleDonation = async (data: InsertDonation) => {
     const amount = customAmount ? parseInt(customAmount) : selectedAmount;
 
-    if (paymentMethod === "card") {
-      if (!stripe || !elements) {
-        toast({
-          title: "Error",
-          description: "Stripe has not been properly initialized",
-          variant: "destructive",
-        });
-        return;
-      }
-
+    if (donationMethod === "card") {
+      // Existing Stripe card processing logic
       try {
-        setIsProcessing(true);
+        // ... (Stripe logic from your original code)
+        // Ensure to remove the stripe promise from the top of the file, and only load it when needed
+        const { loadStripe } = await import('@stripe/stripe-js');
+        const stripePromise = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
-        // Create payment intent
+        if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
+          console.warn('Stripe publishable key is missing. Card processing will not work.');
+        }
+
+        const stripe = await stripePromise;
+        const elements = stripe.elements();
+
+        if (!stripe || !elements) {
+          toast({
+            title: "Error",
+            description: "Stripe has not been properly initialized",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const response = await fetch("/api/donations/create-intent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -94,10 +73,11 @@ function DonationForm() {
 
         const { clientSecret } = await response.json();
 
-        // Confirm the payment
+        const cardElement = elements.create('card');
+
         const { error: paymentError } = await stripe.confirmCardPayment(clientSecret, {
           payment_method: {
-            card: elements.getElement(CardElement)!,
+            card: cardElement,
             billing_details: {
               name: data.name,
               email: data.email,
@@ -122,17 +102,22 @@ function DonationForm() {
           description: error instanceof Error ? error.message : "Please try again",
           variant: "destructive",
         });
-      } finally {
-        setIsProcessing(false);
       }
-    } else if (paymentMethod === "bank") {
-      // Handle bank transfer/deposit logic here
+    } else if (donationMethod === "bank") {
+      // Bank transfer/direct deposit logic
       toast({
-        title: "Bank Transfer Details",
-        description: `Please transfer $${amount} to the following account:\n\nAccount Name: Dummy Account\nIBAN: TR550000100100000926262626\nBank: Dummy Bank\n\nOnce transferred, please send confirmation to example@email.com.`,
-        duration: null,
+        title: "Bank Transfer Instructions",
+        description: (
+          <div>
+            <p>Please transfer ${amount} to the following account:</p>
+            <p><strong>Account Name:</strong> Dummy Account</p>
+            <p><strong>IBAN:</strong> TR55 0000 0000 0000 0000 0000 00</p>
+            <p><strong>Account Number:</strong> 123456789</p>
+            <p>Please use your name as the reference.</p>
+            <p>Thank you for your donation!</p>
+          </div>
+        ),
       });
-
       form.reset();
       setCustomAmount("");
     }
@@ -141,7 +126,6 @@ function DonationForm() {
   return (
     <div className="grid gap-8 md:grid-cols-2">
       <div>
-        {/* Amount Selection and Custom Amount sections remain the same */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Select Amount</h2>
           <div className="grid grid-cols-3 gap-3">
@@ -156,15 +140,15 @@ function DonationForm() {
                   setCustomAmount("");
                 }}
               >
-                ${amount}
-              </Button>
-            ))}
-          </div>
-        </div>
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Custom Amount</h2>
-          <div className="flex items-center">
-            <span className="text-gray-500 mr-2">$</span>
+                <span class="math-inline">\{amount\}
+</Button\>
+\)\)\}
+</div\>
+</div\>
+<div className\="mb\-8"\>
+<h2 className\="text\-xl font\-semibold mb\-4"\>Custom Amount</h2\>
+<div className\="flex items\-center"\>
+<span className\="text\-gray\-500 mr\-2"\></span></span>
             <Input
               type="number"
               min="1"
@@ -178,23 +162,22 @@ function DonationForm() {
           </div>
         </div>
 
-        {/* Payment Method Selection */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+          <h2 className="text-xl font-semibold mb-4">Donation Method</h2>
           <div className="flex gap-4">
             <Button
               type="button"
-              variant={paymentMethod === "card" ? "default" : "outline"}
-              onClick={() => setPaymentMethod("card")}
+              variant={donationMethod === "card" ? "default" : "outline"}
+              onClick={() => setDonationMethod("card")}
             >
               Card
             </Button>
             <Button
               type="button"
-              variant={paymentMethod === "bank" ? "default" : "outline"}
-              onClick={() => setPaymentMethod("bank")}
+              variant={donationMethod === "bank" ? "default" : "outline"}
+              onClick={() => setDonationMethod("bank")}
             >
-              Bank Transfer/Deposit
+              Bank Transfer
             </Button>
           </div>
         </div>
@@ -203,7 +186,8 @@ function DonationForm() {
       <div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleDonation)} className="space-y-6">
-            {/* Name, Email, Message fields remain the same */}
+            {/* Form Fields (Name, Email, Message) */}
+            {/* ... (Your existing form fields) */}
             <FormField
               control={form.control}
               name="name"
@@ -251,43 +235,20 @@ function DonationForm() {
               )}
             />
 
-            {paymentMethod === "card" && (
+            {donationMethod === "card" && (
               <div className="mb-6">
                 <FormLabel>Card Details</FormLabel>
-                <div className="mt-1 p-3 border rounded-md">
-                  <CardElement options={CARD_ELEMENT_OPTIONS} />
+                <div className="mt-1 p-3 border rounded-md bg-white shadow-sm">
+                  <div id="card-element"/>
                 </div>
               </div>
             )}
 
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
-                <>Processing...</>
+            <Button type="submit" className="w-full">
+              {donationMethod === "card" ? (
+                <>
+                  <Heart className="mr-2 h-4 w-4" /> Donate Now (Card)
+                </>
               ) : (
                 <>
-                  <Heart className="mr-2 h-4 w-4" />
-                  Donate ${customAmount ? customAmount : selectedAmount}
-                </>
-              )}
-            </Button>
-          </form>
-        </Form>
-      </div>
-    </div>
-  );
-}
-
-export default function Donate() {
-  return (
-    <div className="container py-10">
-      <h1 className="text-3xl font-bold text-center mb-10">Support Our Community</h1>
-      <Elements stripe={stripePromise}>
-        <DonationForm />
-      </Elements>
-    </div>
-  );
-}
+                  <Banknotes className="mr-
