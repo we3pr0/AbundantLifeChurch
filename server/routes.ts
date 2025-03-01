@@ -48,7 +48,7 @@ export async function registerRoutes(app: Express) {
     try {
       // Create donation record
       const donation = await storage.createDonation(result.data);
-      
+
       res.status(201).json(donation);
     } catch (error) {
       console.error("Error creating donation:", error);
