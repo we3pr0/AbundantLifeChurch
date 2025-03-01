@@ -53,6 +53,7 @@ function DonationForm() {
   const [customAmount, setCustomAmount] = useState<string>("");
   const stripe = useStripe();
   const elements = useElements();
+  const [paymentMethod, setPaymentMethod] = useState("card"); // 'card' or 'bank'
 
   const form = useForm<InsertDonation>({
     resolver: zodResolver(insertDonationSchema),
@@ -65,68 +66,82 @@ function DonationForm() {
   });
 
   const handleDonation = async (data: InsertDonation) => {
-    if (!stripe || !elements) {
-      toast({
-        title: "Error",
-        description: "Stripe has not been properly initialized",
-        variant: "destructive",
-      });
-      return;
-    }
+    const amount = customAmount ? parseInt(customAmount) : selectedAmount;
 
-    try {
-      setIsProcessing(true);
-      const amount = customAmount ? parseInt(customAmount) : selectedAmount;
-
-      // Create payment intent
-      const response = await fetch("/api/donations/create-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, amount }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create payment intent");
+    if (paymentMethod === "card") {
+      if (!stripe || !elements) {
+        toast({
+          title: "Error",
+          description: "Stripe has not been properly initialized",
+          variant: "destructive",
+        });
+        return;
       }
 
-      const { clientSecret } = await response.json();
+      try {
+        setIsProcessing(true);
 
-      // Confirm the payment
-      const { error: paymentError } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement)!,
-          billing_details: {
-            name: data.name,
-            email: data.email,
+        // Create payment intent
+        const response = await fetch("/api/donations/create-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...data, amount }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to create payment intent");
+        }
+
+        const { clientSecret } = await response.json();
+
+        // Confirm the payment
+        const { error: paymentError } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: elements.getElement(CardElement)!,
+            billing_details: {
+              name: data.name,
+              email: data.email,
+            },
           },
-        },
-      });
+        });
 
-      if (paymentError) {
-        throw new Error(paymentError.message);
+        if (paymentError) {
+          throw new Error(paymentError.message);
+        }
+
+        toast({
+          title: "Thank you for your donation!",
+          description: "Your support means a lot to our community.",
+        });
+
+        form.reset();
+        setCustomAmount("");
+      } catch (error) {
+        toast({
+          title: "Error processing donation",
+          description: error instanceof Error ? error.message : "Please try again",
+          variant: "destructive",
+        });
+      } finally {
+        setIsProcessing(false);
       }
-
+    } else if (paymentMethod === "bank") {
+      // Handle bank transfer/deposit logic here
       toast({
-        title: "Thank you for your donation!",
-        description: "Your support means a lot to our community.",
+        title: "Bank Transfer Details",
+        description: `Please transfer $${amount} to the following account:\n\nAccount Name: Dummy Account\nIBAN: TR550000100100000926262626\nBank: Dummy Bank\n\nOnce transferred, please send confirmation to example@email.com.`,
+        duration: null,
       });
 
       form.reset();
       setCustomAmount("");
-    } catch (error) {
-      toast({
-        title: "Error processing donation",
-        description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
     }
   };
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
       <div>
+        {/* Amount Selection and Custom Amount sections remain the same */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Select Amount</h2>
           <div className="grid grid-cols-3 gap-3">
@@ -141,16 +156,15 @@ function DonationForm() {
                   setCustomAmount("");
                 }}
               >
-                ${amount}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Custom Amount</h2>
-          <div className="flex items-center">
-            <span className="text-gray-500 mr-2">$</span>
+                <span class="math-inline">\{amount\}
+</Button\>
+\)\)\}
+</div\>
+</div\>
+<div className\="mb\-8"\>
+<h2 className\="text\-xl font\-semibold mb\-4"\>Custom Amount</h2>
+<div className\="flex items\-center"\>
+<span className\="text\-gray\-500 mr\-2"\></span></span>
             <Input
               type="number"
               min="1"
@@ -163,11 +177,33 @@ function DonationForm() {
             />
           </div>
         </div>
+
+        {/* Payment Method Selection */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+          <div className="flex gap-4">
+            <Button
+              type="button"
+              variant={paymentMethod === "card" ? "default" : "outline"}
+              onClick={() => setPaymentMethod("card")}
+            >
+              Card
+            </Button>
+            <Button
+              type="button"
+              variant={paymentMethod === "bank" ? "default" : "outline"}
+              onClick={() => setPaymentMethod("bank")}
+            >
+              Bank Transfer/Deposit
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleDonation)} className="space-y-6">
+            {/* Name, Email, Message fields remain the same */}
             <FormField
               control={form.control}
               name="name"
@@ -215,60 +251,7 @@ function DonationForm() {
               )}
             />
 
-            <div className="mb-6">
-              <FormLabel>Card Details</FormLabel>
-              <div className="mt-1 p-3 border rounded-md bg-white shadow-sm">
-                <CardElement options={CARD_ELEMENT_OPTIONS} />
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isProcessing || !stripe || !elements}
-            >
-              <Heart className="mr-2 h-4 w-4" />
-              {isProcessing ? "Processing..." : "Donate Now"}
-            </Button>
-          </form>
-        </Form>
-      </div>
-    </div>
-  );
-}
-
-export default function Donate() {
-  return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Support Our Ministry</h1>
-        <p className="text-lg text-gray-600">
-          Your generous donation helps us continue our mission and serve our community.
-        </p>
-      </div>
-
-      <Elements 
-        stripe={stripePromise}
-        options={{
-          appearance: {
-            theme: 'stripe',
-            variables: {
-              colorPrimary: '#0066cc',
-              fontFamily: 'system-ui, sans-serif',
-              spacingUnit: '4px',
-              borderRadius: '4px',
-            },
-            rules: {
-              '.Input': {
-                border: '1px solid #E2E8F0',
-                padding: '8px 12px',
-              }
-            }
-          },
-        }}
-      >
-        <DonationForm />
-      </Elements>
-    </div>
-  );
-}
+            {paymentMethod === "card" && (
+              <div className="mb-6">
+                <FormLabel>Card Details</FormLabel>
+                <div className="mt-1 p-3 border rounded-md
