@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Landmark, BanknoteIcon } from "lucide-react";
+import { Heart, Landmark, Banknote } from "lucide-react";
 
 function DonationForm() {
   const { toast } = useToast();
@@ -161,7 +161,7 @@ function DonationForm() {
               </>
             ) : (
               <>
-                <BanknoteIcon className="mr-2 h-4 w-4" /> Donate Now (Bank)
+                <Banknote className="mr-2 h-4 w-4" /> Donate Now (Bank)
               </>
             )}
           </Button>
