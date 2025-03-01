@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertDonationSchema, type InsertDonation } from "@shared/schema";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,10 +17,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, Landmark, Banknote } from "lucide-react";
 
+// Define donation schema without backend dependencies
+const donationSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  amount: z.string().min(1, "Amount is required"),
+  message: z.string().optional(),
+});
+
+type DonationFormData = z.infer<typeof donationSchema>;
+
 function DonationForm() {
   const { toast } = useToast();
-  const form = useForm<InsertDonation>({
-    resolver: zodResolver(insertDonationSchema),
+  const form = useForm<DonationFormData>({
+    resolver: zodResolver(donationSchema),
     defaultValues: { name: "", email: "", amount: "", message: "" },
   });
 
@@ -34,13 +44,16 @@ function DonationForm() {
   // Add predefined donation amounts
   const predefinedAmounts = [10, 25, 50, 100, 250];
   const [customAmount, setCustomAmount] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [paymentMethod, setPaymentMethod] = useState("bank");
+  const [submitted, setSubmitted] = useState(false);
 
-  const onSubmit = (data: InsertDonation) => {
+  const onSubmit = (data: DonationFormData) => {
+    // Just show a toast and set submitted state instead of sending to backend
     toast({
       title: "Thank you for your generosity!",
       description: `Your donation of $${data.amount} will make a great impact.`,
     });
+    setSubmitted(true);
     form.reset();
   };
 
@@ -48,6 +61,26 @@ function DonationForm() {
     form.setValue("amount", amount.toString());
     setCustomAmount("");
   };
+
+  if (submitted) {
+    return (
+      <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-2xl text-center">
+        <div className="py-10">
+          <Heart className="w-16 h-16 mx-auto text-red-500 mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Thank You for Your Donation!</h2>
+          <p className="text-gray-600 mb-4">
+            Your generosity helps us continue our mission and support our community.
+          </p>
+          <Button
+            onClick={() => setSubmitted(false)}
+            className="mt-4"
+          >
+            Make Another Donation
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-2xl">
@@ -135,36 +168,13 @@ function DonationForm() {
             </FormItem>
           )} />
 
-          <div className="flex space-x-4 mb-4">
-            <Button
-              type="button"
-              variant={paymentMethod === "card" ? "default" : "outline"}
-              className="flex-1"
-              onClick={() => setPaymentMethod("card")}
-            >
-              Credit Card
-            </Button>
-            <Button
-              type="button"
-              variant={paymentMethod === "bank" ? "default" : "outline"}
-              className="flex-1"
-              onClick={() => setPaymentMethod("bank")}
-            >
-              Bank Transfer
-            </Button>
-          </div>
-
           <Button type="submit" className="w-full">
-            {paymentMethod === "card" ? (
-              <>
-                <Heart className="mr-2 h-4 w-4" /> Donate Now (Card)
-              </>
-            ) : (
-              <>
-                <Banknote className="mr-2 h-4 w-4" /> Donate Now (Bank)
-              </>
-            )}
+            <Banknote className="mr-2 h-4 w-4" /> Complete Donation
           </Button>
+          
+          <p className="text-sm text-center text-gray-500 mt-4">
+            Please include your name and email in the bank transfer reference if possible.
+          </p>
         </form>
       </Form>
     </div>

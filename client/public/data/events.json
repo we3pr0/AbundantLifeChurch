@@ -1,0 +1,27 @@
+
+[
+  {
+    "id": 1,
+    "title": "Sunday Service",
+    "description": "Join us for our weekly Sunday service filled with worship, prayer, and teaching.",
+    "date": "2023-10-15T10:00:00.000Z",
+    "location": "Main Sanctuary",
+    "isRecurring": true
+  },
+  {
+    "id": 2,
+    "title": "Youth Night",
+    "description": "A special evening for young people to connect, have fun, and grow in their faith.",
+    "date": "2023-10-20T18:30:00.000Z",
+    "location": "Youth Center",
+    "isRecurring": false
+  },
+  {
+    "id": 3,
+    "title": "Bible Study",
+    "description": "An in-depth study of scripture with discussion and application.",
+    "date": "2023-10-18T19:00:00.000Z",
+    "location": "Fellowship Hall",
+    "isRecurring": true
+  }
+]
