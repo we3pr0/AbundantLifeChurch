@@ -140,15 +140,15 @@ function DonationForm() {
                   setCustomAmount("");
                 }}
               >
-                <span class="math-inline">\{amount\}
-</Button\>
-\)\)\}
-</div\>
-</div\>
-<div className\="mb\-8"\>
-<h2 className\="text\-xl font\-semibold mb\-4"\>Custom Amount</h2\>
-<div className\="flex items\-center"\>
-<span className\="text\-gray\-500 mr\-2"\></span></span>
+                ${amount}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Custom Amount</h2>
+          <div className="flex items-center">
+            <span className="text-gray-500 mr-2">$</span>
             <Input
               type="number"
               min="1"
@@ -251,4 +251,22 @@ function DonationForm() {
                 </>
               ) : (
                 <>
-                  <Banknotes className="mr-
+                  <Banknotes className="mr-2 h-4 w-4" /> Donate Now (Bank)
+                </>
+              )}
+            </Button>
+          </form>
+        </Form>
+      </div>
+    </div>
+  );
+}
+
+export default function DonatePage() {
+  return (
+    <div className="container py-10">
+      <h1 className="text-3xl font-bold text-center mb-10">Support Our Community</h1>
+      <DonationForm />
+    </div>
+  );
+}
