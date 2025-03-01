@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Banknotes } from "lucide-react";
+import { Heart, Landmark } from "lucide-react"; // Replaced Banknotes with Landmark
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
@@ -153,15 +153,17 @@ function DonationForm() {
                   setCustomAmount("");
                 }}
               >
-                <span class="math-inline">\{amount\}
-</Button\>
-\)\)\}
-</div\>
-</div\>
-<div className\="mb\-8"\>
-<h2 className\="text\-xl font\-semibold mb\-4"\>Custom Amount</h2\>
-<div className\="flex items\-center"\>
-<span className\="text\-gray\-500 mr\-2"\></span></span>
+                <span>{amount}</span> {/*Corrected JSX syntax*/}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Custom Amount</h2>
+          <div className="flex items-center">
+            <span className="text-gray-500 mr-2">
+              <Landmark className="mr-2 h-4 w-4" /> {/*Corrected JSX and added Landmark icon*/}
+            </span>
             <Input
               type="number"
               min="1"
@@ -262,4 +264,18 @@ function DonationForm() {
                 </p>
                 <p>
                   <strong>Account Holder:</strong> Dummy Account Holder
-                </p
+                </p>
+              </div>
+            )}
+
+            <Button type="submit" disabled={isProcessing}>
+              {isProcessing ? "Processing..." : "Donate"}
+            </Button>
+          </form>
+        </Form>
+      </div>
+    </div>
+  );
+}
+
+export default DonationForm;
