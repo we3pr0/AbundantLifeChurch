@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Landmark } from "lucide-react"; // Replaced Banknotes with Landmark
+import { Heart, Landmark } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
@@ -51,7 +52,7 @@ function DonationForm() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState<number>(25);
   const [customAmount, setCustomAmount] = useState<string>("");
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank'>('card'); // Added payment method state
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank'>('card');
   const stripe = useStripe();
   const elements = useElements();
 
@@ -153,7 +154,7 @@ function DonationForm() {
                   setCustomAmount("");
                 }}
               >
-                <span>{amount}</span> {/*Corrected JSX syntax*/}
+                ${amount}
               </Button>
             ))}
           </div>
@@ -161,9 +162,7 @@ function DonationForm() {
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Custom Amount</h2>
           <div className="flex items-center">
-            <span className="text-gray-500 mr-2">
-              <Landmark className="mr-2 h-4 w-4" /> {/*Corrected JSX and added Landmark icon*/}
-            </span>
+            <span className="text-gray-500 mr-2">$</span>
             <Input
               type="number"
               min="1"
@@ -269,7 +268,14 @@ function DonationForm() {
             )}
 
             <Button type="submit" disabled={isProcessing}>
-              {isProcessing ? "Processing..." : "Donate"}
+              {isProcessing ? (
+                <>Processing...</>
+              ) : (
+                <>
+                  <Heart className="mr-2 h-4 w-4" />
+                  Donate ${customAmount ? customAmount : selectedAmount}
+                </>
+              )}
             </Button>
           </form>
         </Form>
@@ -278,4 +284,14 @@ function DonationForm() {
   );
 }
 
-export default DonationForm;
+// Export the wrapper component with Elements provider
+export default function Donate() {
+  return (
+    <div className="container py-10">
+      <h1 className="text-3xl font-bold text-center mb-10">Support Our Community</h1>
+      <Elements stripe={stripePromise}>
+        <DonationForm />
+      </Elements>
+    </div>
+  );
+}
