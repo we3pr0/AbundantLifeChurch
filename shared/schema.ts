@@ -25,7 +25,7 @@ export const donations = pgTable("donations", {
   email: text("email").notNull(),
   name: text("name").notNull(),
   message: text("message"),
-  paymentIntentId: text("payment_intent_id").notNull(),
+  paymentIntentId: text("payment_intent_id").notNull().default("manual-bank-transfer"),
   status: text("status").notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });

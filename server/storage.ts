@@ -42,7 +42,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(contactMessages);
   }
 
-  async createDonation(donation: InsertDonation & { paymentIntentId: string }): Promise<Donation> {
+  async createDonation(donation: InsertDonation & { paymentIntentId: string, status: string }): Promise<Donation> {
     const [newDonation] = await db.insert(donations).values(donation).returning();
     return newDonation;
   }
