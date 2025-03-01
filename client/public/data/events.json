@@ -1,27 +1,32 @@
 
-[
-  {
-    "id": 1,
-    "title": "Sunday Service",
-    "description": "Join us for our weekly Sunday service filled with worship, prayer, and teaching.",
-    "date": "2023-10-15T10:00:00.000Z",
-    "location": "Main Sanctuary",
-    "isRecurring": true
-  },
-  {
-    "id": 2,
-    "title": "Youth Night",
-    "description": "A special evening for young people to connect, have fun, and grow in their faith.",
-    "date": "2023-10-20T18:30:00.000Z",
-    "location": "Youth Center",
-    "isRecurring": false
-  },
-  {
-    "id": 3,
-    "title": "Bible Study",
-    "description": "An in-depth study of scripture with discussion and application.",
-    "date": "2023-10-18T19:00:00.000Z",
-    "location": "Fellowship Hall",
-    "isRecurring": true
-  }
-]
+{
+  "events": [
+    {
+      "id": "1",
+      "title": "Sunday Worship Service",
+      "date": "Every Sunday",
+      "time": "10:00 AM - 12:00 PM",
+      "location": "Main Sanctuary",
+      "description": "Join us for our weekly worship service with praise, prayer and teaching.",
+      "imageUrl": "https://images.unsplash.com/photo-1438232992991-995b7058377d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80"
+    },
+    {
+      "id": "2",
+      "title": "Weekly Bible Study",
+      "date": "Every Wednesday",
+      "time": "7:00 PM - 8:30 PM",
+      "location": "Fellowship Hall",
+      "description": "Dive deeper into the Word with our weekly Bible study group.",
+      "imageUrl": "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1370&q=80"
+    },
+    {
+      "id": "3",
+      "title": "Community Outreach",
+      "date": "July 15, 2023",
+      "time": "9:00 AM - 2:00 PM",
+      "location": "Downtown Area",
+      "description": "Join us as we serve our community through various outreach activities.",
+      "imageUrl": "https://images.unsplash.com/photo-1593113598332-cd288d649433?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+    }
+  ]
+}
