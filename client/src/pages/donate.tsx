@@ -156,15 +156,15 @@ function DonationForm() {
                   setCustomAmount("");
                 }}
               >
-                <span class="math-inline">\{amount\}
-</Button\>
-\)\)\}
-</div\>
-</div\>
-<div className\="mb\-8"\>
-<h2 className\="text\-xl font\-semibold mb\-4"\>Custom Amount</h2>
-<div className\="flex items\-center"\>
-<span className\="text\-gray\-500 mr\-2"\></span></span>
+                ${amount}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Custom Amount</h2>
+          <div className="flex items-center">
+            <span className="text-gray-500 mr-2">$</span>
             <Input
               type="number"
               min="1"
@@ -254,4 +254,40 @@ function DonationForm() {
             {paymentMethod === "card" && (
               <div className="mb-6">
                 <FormLabel>Card Details</FormLabel>
-                <div className="mt-1 p-3 border rounded-md
+                <div className="mt-1 p-3 border rounded-md">
+                  <CardElement options={CARD_ELEMENT_OPTIONS} />
+                </div>
+              </div>
+            )}
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isProcessing}
+            >
+              {isProcessing ? (
+                <>Processing...</>
+              ) : (
+                <>
+                  <Heart className="mr-2 h-4 w-4" />
+                  Donate ${customAmount ? customAmount : selectedAmount}
+                </>
+              )}
+            </Button>
+          </form>
+        </Form>
+      </div>
+    </div>
+  );
+}
+
+export default function Donate() {
+  return (
+    <div className="container py-10">
+      <h1 className="text-3xl font-bold text-center mb-10">Support Our Community</h1>
+      <Elements stripe={stripePromise}>
+        <DonationForm />
+      </Elements>
+    </div>
+  );
+}
