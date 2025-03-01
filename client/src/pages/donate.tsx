@@ -16,8 +16,93 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, Landmark } from "lucide-react";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+export default function DonationPage() {
+  const { toast } = useToast();
+  const [submitted, setSubmitted] = useState(false);
+  const form = useForm<InsertDonation>({
+    resolver: zodResolver(insertDonationSchema),
+    defaultValues: { name: "", email: "", amount: "", message: "" },
+  });
+
+  const onSubmit = (data: InsertDonation) => {
+    setSubmitted(true);
+    toast({ title: "Thank you!", description: "Your donation details have been received." });
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-xl">
+      <div className="text-center mb-6">
+        <Heart className="text-red-500 w-12 h-12 mx-auto" />
+        <h1 className="text-2xl font-bold mt-2">Support Our Mission</h1>
+        <p className="text-gray-600">Your generosity helps us continue our work.</p>
+      </div>
+
+      {submitted ? (
+        <div className="text-center text-green-600 font-semibold">Thank you for your generosity!</div>
+      ) : (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField control={form.control} name="name" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Your Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="John Doe" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+
+            <FormField control={form.control} name="email" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email Address</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="johndoe@example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+
+            <FormField control={form.control} name="amount" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Donation Amount</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder="Enter amount" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+
+            <FormField control={form.control} name="message" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Message (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Your message of support" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+
+            <div className="bg-gray-100 p-4 rounded-lg">
+              <h2 className="text-lg font-semibold">Bank Transfer Details</h2>
+              <p className="text-sm text-gray-600">You can make a direct bank transfer using the following details:</p>
+              <div className="mt-2 text-sm font-medium">
+                <p><Landmark className="inline-block w-5 h-5 mr-1 text-blue-500" /> Bank Name: XYZ Bank</p>
+                <p>Account Name: Church Donations</p>
+                <p>Account Number: 1234567890</p>
+                <p>IBAN: TRXX XXXX XXXX XXXX XXXX XX</p>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">Please include your name in the transfer reference.</p>
+            </div>
+
+            <Button type="submit" className="w-full bg-green-500 text-white">Confirm Donation</Button>
+          </form>
+        </Form>
+      )}
+    </div>
+  );
+}
+
 
 // Access the environment variable directly
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
