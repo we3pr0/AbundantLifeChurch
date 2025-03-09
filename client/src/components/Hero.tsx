@@ -13,14 +13,14 @@ export default function Hero() {
       >
         <div className="absolute inset-0 bg-black/50" />
       </div>
-      
+
       <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
           Welcome to Abundant Life Church
         </h1>
         <p className="text-xl sm:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">
-          A vibrant community of faith, love, and purpose. Join us in worship and
-          experience God's presence.
+          A vibrant community of faith, beliervers, love, and purpose. Join us
+          in worship and experience God's presence.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
@@ -28,9 +28,7 @@ export default function Hero() {
             size="lg"
             className="bg-primary hover:bg-primary/90 text-white"
           >
-            <Link href="/events">
-              Join Us This Sunday
-            </Link>
+            <Link href="/events">Join Us This Sunday</Link>
           </Button>
           <Button
             asChild
@@ -38,9 +36,7 @@ export default function Hero() {
             variant="outline"
             className="bg-white/10 text-white border-white/20 hover:bg-white/20"
           >
-            <Link href="/contact">
-              Get in Touch
-            </Link>
+            <Link href="/contact">Get in Touch</Link>
           </Button>
         </div>
       </div>
